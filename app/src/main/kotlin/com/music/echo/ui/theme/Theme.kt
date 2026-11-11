@@ -1,12 +1,9 @@
 package echo.music.iad1tya.ui.theme
 
 import android.graphics.Bitmap
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,13 +12,8 @@ import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.dp
 import androidx.palette.graphics.Palette
-import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.rememberDynamicColorScheme
 import com.materialkolor.score.Score
 import echo.music.iad1tya.constants.AppFont
 import echo.music.iad1tya.constants.SelectedFontKey
@@ -104,7 +96,6 @@ fun echomusicTheme(
   themeColor: Color = DefaultThemeColor,
   content: @Composable () -> Unit,
 ) {
-  val context = LocalContext.current
   val selectedFontValue by rememberPreference(SelectedFontKey, AppFont.SYSTEM.value)
   val customFontPathValue by rememberPreference(echo.music.iad1tya.constants.CustomFontPathKey, "")
 
@@ -143,10 +134,6 @@ fun echomusicTheme(
   MaterialTheme(
     colorScheme = colorScheme,
     typography = getTypography(brandFont),
-    shapes =
-      androidx.compose.material3.MaterialTheme.shapes.copy(
-        extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
-      ),
     content = content
   )
 }

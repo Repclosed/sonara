@@ -2,6 +2,9 @@ package echo.music.iad1tya.ui.player
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -642,13 +645,42 @@ private fun ThumbnailItem(
         },
     contentAlignment = Alignment.Center
   ) {
+    val sonaraLiquidGlass = playerBackground == PlayerBackgroundStyle.LIQUID_GLASS
+    val sonaraArtworkScale by
+      animateFloatAsState(
+        targetValue = if (sonaraLiquidGlass) (if (isPlaying && isCurrentItem) 1f else 0.88f) else 1f,
+        animationSpec = spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow),
+        label = "sonaraArtworkScale",
+      )
+
+    if (sonaraLiquidGlass && isCurrentItem && !hidePlayerThumbnail) {
+      SonaraArtworkGlow(
+        artworkUri =
+          (currentMediaThumbnail ?: item.mediaMetadata.artworkUri?.toString())?.resize(240, 240),
+        cornerRadius = 22.dp,
+        modifier =
+          Modifier.size(dimensions.thumbnailSize).graphicsLayer {
+            scaleX = sonaraArtworkScale
+            scaleY = sonaraArtworkScale
+          },
+      )
+    }
+
     Box(
       modifier =
         Modifier.size(dimensions.thumbnailSize)
-          .graphicsLayer { rotationZ = rotation }
+          .graphicsLayer {
+            rotationZ = rotation
+            if (sonaraLiquidGlass) {
+              scaleX = sonaraArtworkScale
+              scaleY = sonaraArtworkScale
+            }
+          }
           .clip(
             if (rotatingThumbnail) {
               MaterialShapes.Clover8Leaf.toShape()
+            } else if (sonaraLiquidGlass) {
+              RoundedCornerShape(22.dp)
             } else {
               RoundedCornerShape(dimensions.cornerRadius)
             }

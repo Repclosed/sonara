@@ -230,6 +230,9 @@ import echo.music.iad1tya.ui.menu.OldPlayerMenu
 import echo.music.iad1tya.ui.menu.PlayerMenu
 import echo.music.iad1tya.ui.screens.settings.DarkMode
 import echo.music.iad1tya.ui.theme.PlayerColorExtractor
+import echo.music.iad1tya.ui.sonara.SonaraFluidBackdrop
+import echo.music.iad1tya.ui.sonara.SonaraScrubber
+import echo.music.iad1tya.ui.sonara.sonaraGlowRing
 import echo.music.iad1tya.ui.theme.PlayerSliderColors
 import echo.music.iad1tya.ui.utils.ShowMediaInfo
 import echo.music.iad1tya.ui.utils.ShowOffsetDialog
@@ -331,7 +334,7 @@ fun BottomSheetPlayer(
   val playerBackgroundPref by
     rememberEnumPreference(
       key = PlayerBackgroundStyleKey,
-      defaultValue = PlayerBackgroundStyle.GRADIENT
+      defaultValue = PlayerBackgroundStyle.LIQUID_GLASS
     )
   val playerBackground = playerBackgroundPref
   val playerButtonsStyle by
@@ -410,7 +413,8 @@ fun BottomSheetPlayer(
               PlayerBackgroundStyle.GRADIENT,
               PlayerBackgroundStyle.GLOW_ANIMATED,
               PlayerBackgroundStyle.APPLE_MUSIC,
-              PlayerBackgroundStyle.LIVE_MESH
+              PlayerBackgroundStyle.LIVE_MESH,
+              PlayerBackgroundStyle.LIQUID_GLASS
             )
       ) {
         insetsController.isAppearanceLightStatusBars = false
@@ -647,7 +651,8 @@ fun BottomSheetPlayer(
   LaunchedEffect(mediaMetadata?.id, playerBackground) {
     if (
       playerBackground == PlayerBackgroundStyle.GRADIENT ||
-        playerBackground == PlayerBackgroundStyle.GLOW_ANIMATED
+        playerBackground == PlayerBackgroundStyle.GLOW_ANIMATED ||
+        playerBackground == PlayerBackgroundStyle.LIQUID_GLASS
     ) {
       val currentMetadata = mediaMetadata
       if (currentMetadata != null && currentMetadata.thumbnailUrl != null) {
@@ -1084,7 +1089,13 @@ fun BottomSheetPlayer(
         mediaMetadata?.thumbnailUrl
           ?: playerConnection.player.currentMediaItem?.mediaMetadata?.artworkUri?.toString()
       Box(modifier = Modifier.fillMaxSize().background(bottomSheetBackgroundColor)) {
-        when (playerBackground) {
+        if (playerBackground == PlayerBackgroundStyle.LIQUID_GLASS) {
+          SonaraFluidBackdrop(
+            colors = gradientColors,
+            alphaProvider = backgroundAlphaProvider,
+            isPlaying = isPlaying,
+          )
+        } else when (playerBackground) {
           PlayerBackgroundStyle.BLUR -> {
             AnimatedContent(
               targetState = backgroundThumbnailUrl,
@@ -2123,7 +2134,25 @@ fun BottomSheetPlayer(
 
       Spacer(Modifier.height(if (useNewPlayerDesign) 24.dp else 20.dp))
 
-      when (sliderStyle) {
+      if (playerBackground == PlayerBackgroundStyle.LIQUID_GLASS) {
+        SonaraScrubber(
+          position = sliderPosition ?: effectivePosition,
+          duration = if (duration == C.TIME_UNSET) 0L else duration,
+          enabled = !isListenTogetherGuest,
+          onSeek = { target ->
+            if (!isListenTogetherGuest) {
+              if (isCasting) {
+                castHandler?.seekTo(target)
+                lastManualSeekTime = System.currentTimeMillis()
+              } else {
+                playerConnection.player.seekTo(target)
+              }
+              position = target
+            }
+          },
+          modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
+        )
+      } else when (sliderStyle) {
         SliderStyle.DEFAULT -> {
           Slider(
             value = (sliderPosition ?: effectivePosition).toFloat(),
@@ -2281,14 +2310,18 @@ fun BottomSheetPlayer(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding + 4.dp),
       ) {
-        Text(
-          text = makeTimeString(sliderPosition ?: effectivePosition),
-          style = MaterialTheme.typography.labelMedium,
-          color = TextBackgroundColor,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          modifier = Modifier.weight(1f)
-        )
+        if (playerBackground == PlayerBackgroundStyle.LIQUID_GLASS) {
+          Spacer(modifier = Modifier.weight(1f))
+        } else {
+          Text(
+            text = makeTimeString(sliderPosition ?: effectivePosition),
+            style = MaterialTheme.typography.labelMedium,
+            color = TextBackgroundColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+          )
+        }
 
         Row(
           verticalAlignment = Alignment.CenterVertically,
@@ -2773,7 +2806,9 @@ fun BottomSheetPlayer(
                   }
                 },
                 shape =
-                  if (wavyPlayPause && cookieIndent > 0f) WavyShape(9, cookieIndent, rotation) else mainButtonSquircle,
+                  if (playerBackground == PlayerBackgroundStyle.LIQUID_GLASS) CircleShape
+                  else if (wavyPlayPause && cookieIndent > 0f) WavyShape(9, cookieIndent, rotation)
+                  else mainButtonSquircle,
                 interactionSource = playPauseInteractionSource,
                 colors =
                   IconButtonDefaults.filledIconButtonColors(
@@ -2781,10 +2816,18 @@ fun BottomSheetPlayer(
                     contentColor = iconButtonColor,
                   ),
                 modifier =
-                  Modifier.size(mainButtonSize).graphicsLayer {
-                    scaleX = playPauseScale
-                    scaleY = playPauseScale
-                  }
+                  Modifier.size(mainButtonSize)
+                    .then(
+                      if (playerBackground == PlayerBackgroundStyle.LIQUID_GLASS) {
+                        Modifier.sonaraGlowRing(shape = CircleShape)
+                      } else {
+                        Modifier
+                      }
+                    )
+                    .graphicsLayer {
+                      scaleX = playPauseScale
+                      scaleY = playPauseScale
+                    }
               ) {
                 Row(
                   verticalAlignment = Alignment.CenterVertically,

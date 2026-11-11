@@ -129,6 +129,8 @@ import echo.music.iad1tya.ui.component.isGlassSupported
 import echo.music.iad1tya.ui.component.liquidGlass
 import echo.music.iad1tya.ui.screens.settings.DarkMode
 import echo.music.iad1tya.ui.theme.PlayerColorExtractor
+import echo.music.iad1tya.ui.sonara.SonaraMiniVisualizer
+import echo.music.iad1tya.ui.sonara.sonaraNeonRim
 import echo.music.iad1tya.utils.rememberEnumPreference
 import echo.music.iad1tya.utils.rememberPreference
 import kotlin.math.absoluteValue
@@ -192,7 +194,7 @@ fun MiniPlayer(
     val miniPlayerBackground by
       rememberEnumPreference(
         MiniPlayerBackgroundStyleKey,
-        defaultValue = PlayerBackgroundStyle.DEFAULT
+        defaultValue = PlayerBackgroundStyle.LIQUID_GLASS
       )
     val pureBlackMini by rememberPreference(PureBlackMiniPlayerKey, defaultValue = false)
 
@@ -300,6 +302,7 @@ private fun NewMiniPlayer(progressState: ProgressState, modifier: Modifier = Mod
   val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
   val canSkipNext by playerConnection.canSkipNext.collectAsState()
   val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
+  val isPlaying by playerConnection.isPlaying.collectAsState()
 
   val castHandler =
     remember(playerConnection) {
@@ -466,12 +469,17 @@ private fun NewMiniPlayer(progressState: ProgressState, modifier: Modifier = Mod
           .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
           .let { m ->
             val shape = RoundedCornerShape(percent = 50)
-            if (useGlass) {
+            val body =
+              if (useGlass) {
                 m.clip(shape).liquidGlass(config = glassConfig, shape = shape)
               } else {
                 m.clip(shape).background(bgTint)
               }
-              .border(1.dp, outlineColor.copy(alpha = 0.3f), shape)
+            if (miniPlayerBackground == PlayerBackgroundStyle.LIQUID_GLASS) {
+              body.sonaraNeonRim(shape = shape)
+            } else {
+              body.border(1.dp, outlineColor.copy(alpha = 0.3f), shape)
+            }
           }
     ) {
       MiniPlayerBackgroundLayer(
@@ -519,6 +527,13 @@ private fun NewMiniPlayer(progressState: ProgressState, modifier: Modifier = Mod
             )
           }
           Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        if (miniPlayerBackground == PlayerBackgroundStyle.LIQUID_GLASS) {
+          SonaraMiniVisualizer(
+            isPlaying = isPlaying,
+            modifier = Modifier.padding(horizontal = 6.dp),
+          )
         }
 
         MiniPlayerControls(
@@ -1044,7 +1059,8 @@ private fun MiniPlayerColorExtractor(
   LaunchedEffect(mediaMetadata?.id, miniPlayerBackground) {
     if (
       miniPlayerBackground == PlayerBackgroundStyle.GRADIENT ||
-        miniPlayerBackground == PlayerBackgroundStyle.GLOW_ANIMATED
+        miniPlayerBackground == PlayerBackgroundStyle.GLOW_ANIMATED ||
+        miniPlayerBackground == PlayerBackgroundStyle.LIQUID_GLASS
     ) {
       val currentMetadata = mediaMetadata
       if (currentMetadata?.thumbnailUrl != null) {
