@@ -132,58 +132,38 @@ fun ChangelogScreen(
             showingCached = true
           }
         } else {
-          val changelogUrl =
-            URL("https://github.com/EchoMusicApp/Echo-Music/releases/download/$tag/changelog.json")
-          val connection = changelogUrl.openConnection() as HttpURLConnection
-          connection.setRequestProperty("User-Agent", "echomusic-Changelog-App")
-          connection.setRequestProperty("Accept", "application/json")
+          val releaseApi =
+            URL("https://api.github.com/repos/repclosed/sonara/releases/tags/$tag")
+          val connection = releaseApi.openConnection() as HttpURLConnection
+          connection.connectTimeout = 15_000
+          connection.readTimeout = 15_000
+          connection.setRequestProperty("User-Agent", "Sonara-Android")
+          connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
 
           if (connection.responseCode == 200) {
-            val changelogJson = connection.inputStream.bufferedReader().use { it.readText() }
-            val changelogData = JSONObject(changelogJson)
+            val releaseJson = connection.inputStream.bufferedReader().use { it.readText() }
+            val releaseData = JSONObject(releaseJson)
+            val body = releaseData.optString("body", "")
 
-            val desc = changelogData.optString("description", null)
-            val imageUrl = changelogData.optString("image", null)
-            val warning = changelogData.optString("warning", null)
-            val changelogArray = changelogData.optJSONArray("changelog")
+            val (parsedDescription, parsedSections) =
+              if (body.isBlank()) Pair(null, emptyList<ChangelogSection>())
+              else echo.music.iad1tya.ui.utils.parseMarkdownToSections(body)
 
-            val sections = mutableListOf<ChangelogSection>()
-            if (changelogArray != null) {
-              for (i in 0 until changelogArray.length()) {
-                val sectionObj = changelogArray.optJSONObject(i)
-                if (sectionObj != null) {
-                  val title = sectionObj.optString("title", "")
-                  val itemsArray = sectionObj.optJSONArray("items")
-                  val items = mutableListOf<String>()
-                  if (itemsArray != null) {
-                    for (j in 0 until itemsArray.length()) {
-                      items.add(itemsArray.getString(j))
-                    }
-                  }
-                  if (title.isNotBlank() || items.isNotEmpty()) {
-                    sections.add(ChangelogSection(title, items))
-                  }
-                } else {
+            val imageUrl =
+              Regex("!\\[(.*?)\\]\\((.*?)\\)")
+                .find(body)
+                ?.groupValues
+                ?.getOrNull(2)
+                ?.takeIf { it.isNotBlank() }
 
-                  val item = changelogArray.optString(i, "")
-                  if (item.isNotBlank()) {
-                    if (sections.isEmpty() || sections[0].title.isNotBlank()) {
-                      sections.add(0, ChangelogSection("", mutableListOf()))
-                    }
-                    (sections[0].items as MutableList<String>).add(item)
-                  }
-                }
-              }
-            }
-
-            saveChangelogToCache(context, tag, sections, imageUrl, desc, warning)
+            saveChangelogToCache(context, tag, parsedSections, imageUrl, parsedDescription, null)
             withContext(Dispatchers.Main) {
-              changelogSections = sections
-              updateImage = imageUrl.takeIf { !it.isNullOrBlank() }
-              updateDescription = desc.takeIf { !it.isNullOrBlank() }
-              updateWarning = warning.takeIf { !it.isNullOrBlank() }
+              changelogSections = parsedSections
+              updateImage = imageUrl
+              updateDescription = parsedDescription
+              updateWarning = null
               isLoading = false
-              hasError = false
+              hasError = parsedSections.isEmpty() && parsedDescription.isNullOrBlank()
               showingCached = false
             }
           } else {
@@ -209,9 +189,9 @@ fun ChangelogScreen(
     isFetchingOldReleases = true
     coroutineScope.launch(Dispatchers.IO) {
       try {
-        val releasesUrl = URL("https://api.github.com/repos/EchoMusicApp/Echo-Music/releases")
+        val releasesUrl = URL("https://api.github.com/repos/repclosed/sonara/releases")
         val connection = releasesUrl.openConnection() as HttpURLConnection
-        connection.setRequestProperty("User-Agent", "echomusic-Changelog-App")
+        connection.setRequestProperty("User-Agent", "Sonara-Android")
         connection.setRequestProperty("Accept", "application/vnd.github+json")
 
         if (connection.responseCode == 200) {
@@ -234,17 +214,10 @@ fun ChangelogScreen(
                 publishedAt
               }
 
-            val assets = obj.getJSONArray("assets")
-            var changelogUrl: String? = null
-            for (j in 0 until assets.length()) {
-              val asset = assets.getJSONObject(j)
-              if (asset.getString("name") == "changelog.json") {
-                changelogUrl = asset.getString("browser_download_url")
-                break
-              }
-            }
-
-            if (changelogUrl != null) {
+            val hasBody =
+              obj.optString("body", "").isNotBlank() ||
+                (obj.optJSONArray("assets")?.length() ?: 0) > 0
+            if (hasBody) {
               list.add(ReleaseMetadata(tagName, name, formattedDate, null))
             }
           }

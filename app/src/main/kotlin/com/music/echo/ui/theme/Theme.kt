@@ -27,7 +27,74 @@ import echo.music.iad1tya.constants.AppFont
 import echo.music.iad1tya.constants.SelectedFontKey
 import echo.music.iad1tya.utils.rememberPreference
 
-val DefaultThemeColor = Color(0xFFED5564)
+val DefaultThemeColor = Color(0xFF00F5FF)
+
+/**
+ * Sonara cyberpunk × liquid-glass palette.
+ *
+ * The theme always paints the obsidian void canvas; the user-selected accent
+ * only feeds [accent]-driven slots, so every surface keeps its neon identity.
+ */
+object SonaraPalette {
+  val VoidCanvas = Color(0xFF05060A)
+  val LaserCyan = Color(0xFF00F5FF)
+  val Ultraviolet = Color(0xFFBD00FF)
+  val CircuitAmber = Color(0xFFFF0055)
+  val AcidLime = Color(0xFF00FF66)
+  val GlassFill = Color(0x220D111A)
+  val GlassRimStart = Color(0x8000F5FF)
+  val GlassRimMid = Color(0x40BD00FF)
+  val GlassRimEnd = Color(0x10FFFFFF)
+  val TextPrimary = Color(0xFFEAF7FF)
+  val TextSecondary = Color(0xFFA0B0D0)
+  val SurfaceElevated = Color(0xFF0D111A)
+  val SurfaceHigh = Color(0xFF141A26)
+  val SurfaceHighest = Color(0xFF1B2331)
+  val OutlineNeon = Color(0x3300F5FF)
+}
+
+private fun sonaraColorScheme(accent: Color, pureBlack: Boolean): ColorScheme {
+  val canvas = if (pureBlack) Color.Black else SonaraPalette.VoidCanvas
+  val surfaceLow = if (pureBlack) Color(0xFF050505) else Color(0xFF0A0D14)
+  return androidx.compose.material3.darkColorScheme(
+    primary = accent,
+    onPrimary = Color(0xFF001014),
+    primaryContainer = accent.copy(alpha = 0.18f),
+    onPrimaryContainer = SonaraPalette.LaserCyan,
+    inversePrimary = SonaraPalette.Ultraviolet,
+    secondary = SonaraPalette.Ultraviolet,
+    onSecondary = Color.White,
+    secondaryContainer = SonaraPalette.Ultraviolet.copy(alpha = 0.20f),
+    onSecondaryContainer = Color(0xFFF4D9FF),
+    tertiary = SonaraPalette.CircuitAmber,
+    onTertiary = Color.White,
+    tertiaryContainer = SonaraPalette.CircuitAmber.copy(alpha = 0.20f),
+    onTertiaryContainer = Color(0xFFFFD6E2),
+    background = canvas,
+    onBackground = SonaraPalette.TextPrimary,
+    surface = canvas,
+    onSurface = SonaraPalette.TextPrimary,
+    surfaceVariant = SonaraPalette.SurfaceHigh,
+    onSurfaceVariant = SonaraPalette.TextSecondary,
+    surfaceTint = accent,
+    inverseSurface = SonaraPalette.TextPrimary,
+    inverseOnSurface = canvas,
+    error = SonaraPalette.CircuitAmber,
+    onError = Color.White,
+    errorContainer = SonaraPalette.CircuitAmber.copy(alpha = 0.2f),
+    onErrorContainer = Color(0xFFFFD6E2),
+    outline = SonaraPalette.OutlineNeon,
+    outlineVariant = Color(0x1AFFFFFF),
+    scrim = Color.Black,
+    surfaceBright = SonaraPalette.SurfaceHighest,
+    surfaceDim = surfaceLow,
+    surfaceContainer = SonaraPalette.SurfaceElevated,
+    surfaceContainerHigh = SonaraPalette.SurfaceHigh,
+    surfaceContainerHighest = SonaraPalette.SurfaceHighest,
+    surfaceContainerLow = surfaceLow,
+    surfaceContainerLowest = if (pureBlack) Color.Black else Color(0xFF07090F),
+  )
+}
 
 @Composable
 fun echomusicTheme(
@@ -64,36 +131,12 @@ fun echomusicTheme(
       }
     }
 
-  val useSystemDynamicColor =
-    !isMonochrome && (themeColor == DefaultThemeColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-
-  val baseColorScheme =
-    if (isMonochrome) {
-      val dynamicMono =
-        rememberDynamicColorScheme(
-          seedColor = Color(0xFF808080),
-          isDark = darkTheme,
-          specVersion = ColorSpec.SpecVersion.SPEC_2025,
-          style = PaletteStyle.Monochrome
-        )
-      remember(dynamicMono) { dynamicMono.toGrayscaleColorScheme() }
-    } else if (useSystemDynamicColor) {
-      if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    } else {
-      rememberDynamicColorScheme(
-        seedColor = themeColor,
-        isDark = darkTheme,
-        specVersion = ColorSpec.SpecVersion.SPEC_2025,
-        style = PaletteStyle.TonalSpot
-      )
-    }
-
   val colorScheme =
-    remember(baseColorScheme, pureBlack, darkTheme, isMonochrome) {
-      if (darkTheme && pureBlack) {
-        baseColorScheme.pureBlack(true)
+    remember(themeColor, pureBlack, isMonochrome) {
+      if (isMonochrome) {
+        sonaraColorScheme(Color(0xFF9AA4B2), pureBlack).toGrayscaleColorScheme()
       } else {
-        baseColorScheme
+        sonaraColorScheme(themeColor, pureBlack)
       }
     }
 

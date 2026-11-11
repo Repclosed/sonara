@@ -123,24 +123,6 @@ fun ExtensionSettingsScreen(
                         )
                     },
                     onClick = { onPreferExtensionAudioChange(!preferExtensionAudio) }
-                ),
-                Material3SettingsItem(
-                    title = { Text("High Quality (320kbps) Music Quality") },
-                    description = { Text("Visit 320kbps.echomusic.fun for setup guide") },
-                    icon = painterResource(R.drawable.ic_hq),
-                    trailingContent = {
-                        Icon(
-                            painter = painterResource(R.drawable.navigate_next),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    onClick = {
-                        try {
-                            uriHandler.openUri("https://320kbps.echomusic.fun/")
-                        } catch (_: Exception) {}
-                    }
                 )
             )
         )

@@ -208,7 +208,7 @@ object WrappedShareHelper {
       letterSpacing = -0.04f
       typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
-    canvas.drawText("Echo Music", marginX + 70f, 156f, wordmarkPaint)
+    canvas.drawText("Sonara", marginX + 70f, 156f, wordmarkPaint)
 
     val yearPaint = Paint().apply {
       isAntiAlias = true
@@ -509,11 +509,11 @@ object WrappedShareHelper {
         ComposeToImage.saveBitmapAsFile(
           context = context,
           bitmap = bitmap,
-          fileName = "Echo_Wrapped_${data.yearLabel}_${System.currentTimeMillis()}"
+          fileName = "Sonara_Wrapped_${data.yearLabel}_${System.currentTimeMillis()}"
         )
       } catch (_: Exception) {
         val cachePath = java.io.File(context.cacheDir, "images").apply { mkdirs() }
-        val imageFile = java.io.File(cachePath, "Echo_Wrapped_${System.currentTimeMillis()}.png")
+        val imageFile = java.io.File(cachePath, "Sonara_Wrapped_${System.currentTimeMillis()}.png")
         java.io.FileOutputStream(imageFile).use { out ->
           bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
@@ -525,11 +525,11 @@ object WrappedShareHelper {
         putExtra(Intent.EXTRA_STREAM, uri)
         putExtra(
           Intent.EXTRA_TEXT,
-          "Here is my ${data.yearLabel} Wrapped on Echo Music! 🎵\nTop Song: ${data.topSong?.title ?: "Various"}\nTop Artist: ${data.topArtist?.title ?: "Various"}\nPersona: ${data.dominantVibe}"
+          "Here is my ${data.yearLabel} Wrapped on Sonara! 🎵\nTop Song: ${data.topSong?.title ?: "Various"}\nTop Artist: ${data.topArtist?.title ?: "Various"}\nPersona: ${data.dominantVibe}"
         )
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
       }
-      val chooser = Intent.createChooser(intent, "Share Echo Wrapped").apply {
+      val chooser = Intent.createChooser(intent, "Share Sonara Wrapped").apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       }
       context.startActivity(chooser)

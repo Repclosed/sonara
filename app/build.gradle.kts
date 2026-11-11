@@ -17,20 +17,13 @@ plugins {
   alias(libs.plugins.protobufPlugin)
 }
 
-val hasGoogleServicesConfig = file("google-services.json").exists()
-
-if (hasGoogleServicesConfig) {
-  apply(plugin = "com.google.gms.google-services")
-  apply(plugin = "com.google.firebase.crashlytics")
-}
-
 android {
   namespace = "echo.music.iad1tya"
   compileSdk = 37
   ndkVersion = "28.2.13676358"
 
   defaultConfig {
-    applicationId = "echo.music.iad1tya"
+    applicationId = "com.cyan.sonara"
     minSdk = 26
     targetSdk = 36
     versionCode = 167
@@ -246,11 +239,6 @@ dependencies {
   implementation(project(":audio-dsp"))
   implementation(project(":dsp-core"))
   implementation(project(":usbaudio"))
-
-  // Firebase - GMS flavor only (excluded from F-Droid / FOSS builds)
-  "gmsImplementation"(platform("com.google.firebase:firebase-bom:34.19.0"))
-  "gmsImplementation"("com.google.firebase:firebase-analytics")
-  "gmsImplementation"("com.google.firebase:firebase-crashlytics")
 
   // GMS Location Services for high-accuracy weather AI context
   "gmsImplementation"(libs.play.services.location)

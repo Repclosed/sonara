@@ -85,11 +85,19 @@ fun UpdateSettings(
 
     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
       try {
-        val url =
-          java.net.URL("https://api.github.com/repos/EchoMusicApp/Echo-Music/releases/latest")
-        val json = url.openStream().bufferedReader().use { it.readText() }
+        val connection =
+          (java.net.URL("https://api.github.com/repos/repclosed/sonara/releases/latest")
+              .openConnection() as java.net.HttpURLConnection)
+            .apply {
+              connectTimeout = 15_000
+              readTimeout = 15_000
+              setRequestProperty("Accept", "application/vnd.github.v3+json")
+              setRequestProperty("User-Agent", "Sonara-Android")
+            }
+        val json = connection.inputStream.bufferedReader().use { it.readText() }
+        connection.disconnect()
         val targetRelease = JSONObject(json)
-        releaseNotes = targetRelease.getString("body")
+        releaseNotes = targetRelease.optString("body").takeIf { it.isNotBlank() }
       } catch (e: Exception) {
         e.printStackTrace()
       }
@@ -133,7 +141,11 @@ fun UpdateSettings(
               }
             },
             onClick = {
-              val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://echomusic.fun"))
+              val intent =
+                Intent(
+                  Intent.ACTION_VIEW,
+                  Uri.parse("https://github.com/repclosed/sonara/releases")
+                )
               context.startActivity(intent)
             }
           )
@@ -142,7 +154,7 @@ fun UpdateSettings(
 
     Text(
       text =
-        "To download updates, you will be redirected to our official site containing ads. This helps fund the app's development. Thank you for your support!",
+        "Sonara updates are published exclusively on GitHub Releases. Downloading an update opens the official github.com/repclosed/sonara release page.",
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
       modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)

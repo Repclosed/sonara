@@ -1,6 +1,6 @@
-# Contributing to Echo Music
+# Contributing to Sonara
 
-Thank you for your interest in contributing to Echo Music! This document provides comprehensive guidelines and information for contributors.
+Thank you for your interest in contributing to Sonara! This document provides comprehensive guidelines and information for contributors.
 
 ## Table of Contents
 
@@ -70,7 +70,7 @@ We are committed to providing a welcoming and inspiring community for all. We pl
    ```
 3. Add the upstream repository:
    ```bash
-   git remote add upstream https://github.com/EchoMusicApp/Echo-Music.git
+   git remote add upstream https://github.com/repclosed/sonara.git
    ```
 
 ## Development Setup
@@ -107,7 +107,7 @@ If you want to test Firebase features:
 
 ## Handling Sensitive Information
 
-When contributing to Echo Music, it's crucial to handle sensitive information properly:
+When contributing to Sonara, it's crucial to handle sensitive information properly:
 
 ### Files That Should Never Be Committed
 
@@ -319,7 +319,7 @@ lyrics/         Lyrics orchestration
 models/         Shared data models
 playback/       Media3/ExoPlayer service, download manager, queueing, audio
 quicksettings/  Android quick settings tile
-recognition/    Music recognition (Echo Find) app-side logic
+recognition/    Music recognition (Sonara Find) app-side logic
 spotify/        Spotify API integration
 spotifyimport/  Import playlists/tracks from Spotify
 ui/
@@ -428,7 +428,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 If you have questions about contributing:
 
-1. Check the [GitHub Discussions](https://github.com/iad1tya/Echo-Music/discussions)
+1. Check the [GitHub Discussions](https://github.com/repclosed/sonara/discussions)
 2. Create a new discussion
 3. Contact maintainers directly through GitHub
 
@@ -444,11 +444,11 @@ Contributors will be recognized in:
 
 If you have questions about contributing:
 
-1. Check the [GitHub Discussions](https://github.com/iad1tya/Echo-Music/discussions)
+1. Check the [GitHub Discussions](https://github.com/repclosed/sonara/discussions)
 2. Create a new discussion
 3. Contact maintainers directly
 
-Thank you for contributing to Echo Music!
+Thank you for contributing to Sonara!
 
 ---
 <div align="center">

@@ -17,6 +17,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -395,6 +396,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen()
     super.onCreate(savedInstanceState)
+    enableEdgeToEdge()
 
     try {
       startService(Intent(this, echo.music.iad1tya.playback.MusicService::class.java))
@@ -538,6 +540,8 @@ class MainActivity : ComponentActivity() {
     var availableUpdateDescription by remember {
       androidx.compose.runtime.mutableStateOf<String?>(null)
     }
+    var availableUpdateTitle by remember { androidx.compose.runtime.mutableStateOf("") }
+    var availableUpdateReleaseUrl by remember { androidx.compose.runtime.mutableStateOf("") }
     var whatsNewInfo by remember {
       androidx.compose.runtime.mutableStateOf<echo.music.iad1tya.echomusic.updater.WhatsNewInfo?>(
         null
@@ -577,7 +581,7 @@ class MainActivity : ComponentActivity() {
         delay(2000L)
         checkForUpdate(
           context = context,
-          onSuccess = { latestVersion, isAvailable, changelog, _, _, description, _, _ ->
+          onSuccess = { latestVersion, isAvailable, changelog, _, _, description, _, _, releaseTitle, releaseUrl ->
             val currentVersion = BuildConfig.VERSION_NAME
             Log.d(
               "UpdateCheck",
@@ -589,6 +593,8 @@ class MainActivity : ComponentActivity() {
               availableUpdateVersion = latestVersion
               availableUpdateChangelog = changelog
               availableUpdateDescription = description
+              availableUpdateTitle = releaseTitle
+              availableUpdateReleaseUrl = releaseUrl
               showUpdateDialog = true
             }
 
@@ -599,68 +605,6 @@ class MainActivity : ComponentActivity() {
           },
           onError = { Log.e("UpdateCheck", "Startup check failed") }
         )
-      }
-    }
-
-    val HasShownBirthdayNotificationKey = remember {
-      androidx.datastore.preferences.core.booleanPreferencesKey("has_shown_birthday_notification")
-    }
-    LaunchedEffect(Unit) {
-      val today = java.time.LocalDate.now()
-      if (today.month == java.time.Month.OCTOBER && today.dayOfMonth == 14) {
-        val prefs = context.dataStore.data.first()
-        val hasShown = prefs[HasShownBirthdayNotificationKey] ?: false
-        if (!hasShown) {
-          if (
-            android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU ||
-              androidx.core.content.ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.POST_NOTIFICATIONS
-              ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-          ) {
-
-            val channelId = "birthday_channel"
-            val notificationManager =
-              context.getSystemService(android.app.NotificationManager::class.java)
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-              val channel =
-                android.app.NotificationChannel(
-                  channelId,
-                  "Birthday",
-                  android.app.NotificationManager.IMPORTANCE_HIGH
-                )
-              notificationManager.createNotificationChannel(channel)
-            }
-
-            val bitmap =
-              android.graphics.BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.birthday_image
-              )
-
-            val notification =
-              androidx.core.app.NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.echomusicnotification) // Use correct transparent echo icon
-                .setContentTitle("Happy Birthday Aditya!")
-                .setContentText("Today is the developer's birthday!")
-                .setLargeIcon(bitmap)
-                .setStyle(
-                  androidx.core.app.NotificationCompat.BigPictureStyle()
-                    .bigPicture(bitmap)
-                    .bigLargeIcon(null as android.graphics.Bitmap?)
-                )
-                .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-                .build()
-
-            notificationManager.notify(1014, notification)
-
-            context.dataStore.edit { preferences ->
-              preferences[HasShownBirthdayNotificationKey] = true
-            }
-          }
-        }
       }
     }
 
@@ -765,7 +709,9 @@ class MainActivity : ComponentActivity() {
           version = availableUpdateVersion,
           changelog = availableUpdateChangelog,
           description = availableUpdateDescription,
-          onDismiss = { showUpdateDialog = false }
+          onDismiss = { showUpdateDialog = false },
+          title = availableUpdateTitle,
+          downloadUrl = availableUpdateReleaseUrl,
         )
       } else {
         whatsNewInfo?.let { info ->
@@ -1158,7 +1104,7 @@ class MainActivity : ComponentActivity() {
 
         val currentTitle =
           when (navBackStackEntry?.destination?.route) {
-            Screens.Home.route -> "Echo Music"
+            Screens.Home.route -> "Sonara"
             Screens.Search.route -> stringResource(R.string.search)
             Screens.Library.route -> stringResource(R.string.filter_library)
             Screens.ListenTogether.route -> stringResource(R.string.together)
@@ -1987,7 +1933,7 @@ class MainActivity : ComponentActivity() {
         val videoId =
           when {
             path == "watch" -> uri.getQueryParameter("v")
-            uri.host == "youtu.be" || uri.host == "share.echomusic.fun" ->
+            uri.host == "youtu.be" || uri.host == "music.youtube.com" ->
               uri.pathSegments.firstOrNull()
             else -> null
           }

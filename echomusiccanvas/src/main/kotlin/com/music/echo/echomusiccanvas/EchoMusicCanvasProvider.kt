@@ -19,7 +19,7 @@ data class echomusicCanvasManifest(val items: List<echomusicCanvasItem> = emptyL
 @Serializable data class echomusicCanvasItem(val song: String, val artist: String, val url: String)
 
 object echomusicCanvasProvider {
-  private const val BASE_URL = "https://canvas.echomusic.fun/canvas.json"
+  // Sonara no longer consumes the upstream Echo Music canvas feed.
 
   private val json = Json {
     ignoreUnknownKeys = true
@@ -54,6 +54,8 @@ object echomusicCanvasProvider {
   private val ttlMs = 60_000L
 
   private suspend fun fetchManifest(): echomusicCanvasManifest? {
+    // Upstream third-party canvas feed removed for Sonara.
+    return null
     val currentCache = manifestCache
     if (currentCache != null && currentCache.expiresAtMs > System.currentTimeMillis()) {
       return currentCache.value

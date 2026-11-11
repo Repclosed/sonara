@@ -126,7 +126,7 @@ fun QueueMenu(
   if (showWhyDialog) {
     androidx.compose.material3.AlertDialog(
       onDismissRequest = { showWhyDialog = false },
-      title = { androidx.compose.material3.Text(text = "Echo Brain Recommendation") },
+      title = { androidx.compose.material3.Text(text = "Sonara Brain Recommendation") },
       text = {
         androidx.compose.material3.Text(
           text =
@@ -283,7 +283,7 @@ fun QueueMenu(
                     type = "text/plain"
                     putExtra(
                       Intent.EXTRA_TEXT,
-                      "https://share.echomusic.fun/watch?v=${mediaMetadata.id}"
+                      "https://music.youtube.com/watch?v=${mediaMetadata.id}"
                     )
                   }
                 context.startActivity(Intent.createChooser(intent, null))
