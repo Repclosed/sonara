@@ -75,6 +75,7 @@ import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.music.echo.ui.sonara.SonaraArtworkGlow
 import echo.music.iad1tya.LocalListenTogetherManager
 import echo.music.iad1tya.LocalPlayerConnection
 import echo.music.iad1tya.R

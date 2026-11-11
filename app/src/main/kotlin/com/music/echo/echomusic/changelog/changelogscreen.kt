@@ -145,9 +145,16 @@ fun ChangelogScreen(
             val releaseData = JSONObject(releaseJson)
             val body = releaseData.optString("body", "")
 
-            val (parsedDescription, parsedSections) =
-              if (body.isBlank()) Pair(null, emptyList<ChangelogSection>())
-              else echo.music.iad1tya.ui.utils.parseMarkdownToSections(body)
+            val parsedDescription: String?
+            val parsedSections: List<ChangelogSection>
+            if (body.isBlank()) {
+              parsedDescription = null
+              parsedSections = emptyList<ChangelogSection>()
+            } else {
+              val parsed = echo.music.iad1tya.ui.utils.parseMarkdownToSections(body)
+              parsedDescription = parsed.first
+              parsedSections = parsed.second
+            }
 
             val imageUrl =
               Regex("!\\[(.*?)\\]\\((.*?)\\)")

@@ -1,4 +1,4 @@
-package echo.music.iad1tya.ui.sonara
+package com.music.echo.ui.sonara
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,11 +9,12 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 
 /**
  * Blurred duplicate of the album art that sits behind the artwork, giving the Sonara Now Playing
@@ -38,8 +39,7 @@ fun SonaraArtworkGlow(
       model = ImageRequest.Builder(LocalContext.current).data(artworkUri).crossfade(true).build(),
       contentDescription = null,
       contentScale = ContentScale.Crop,
-      modifier =
-        Modifier.fillMaxSize().blur(32.dp).clip(RoundedCornerShape(cornerRadius)),
+      modifier = Modifier.fillMaxSize().blur(32.dp).clip(RoundedCornerShape(cornerRadius)),
     )
   }
 }
