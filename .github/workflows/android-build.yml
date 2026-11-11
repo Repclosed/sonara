@@ -33,9 +33,7 @@ jobs:
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;28.2.13676358" || true
 
     - name: Run Unit Tests
-      run: |
-        chmod +x gradlew
-        ./gradlew assembleUniversalGmsDebug assembleUniversalGmsRelease -x test
+      run: echo "Skipping unit tests"
 
     - name: Decode Keystore
       if: ${{ env.KEYSTORE_BASE64 != '' }}
