@@ -39,3 +39,6 @@ lastfm-empty/build/
 BitChord-main/
 ArchiveTune-main/
 PixelMusic-main/
+
+# Rust build artifacts
+rust/target/
